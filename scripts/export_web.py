@@ -110,8 +110,13 @@ def med(v):
 
 
 def md_table(header: list[str], body: list[list]) -> str:
-    fmt = lambda v: "–" if v is None else (f"{v:,.0f}" if isinstance(v, (int, float)) and float(v).is_integer() and abs(float(v)) >= 1000
-                                          else (f"{float(v):g}" if not isinstance(v, str) else v))
+    def fmt(v):
+        if v is None:
+            return "–"
+        if isinstance(v, str):
+            return v
+        f = float(v)
+        return f"{f:,.0f}" if abs(f) >= 1000 else f"{f:g}"
     lines = ["| " + " | ".join(header) + " |", "|" + "|".join("---" for _ in header) + "|"]
     lines += ["| " + " | ".join(fmt(v) for v in r) + " |" for r in body]
     return "\n".join(lines)
@@ -169,20 +174,28 @@ def results_md(cur, s: str, v: str) -> tuple[str, dict]:
                      [[r["district"], float(r["pop"]), f"{r['w10']} %", med(r["wmed"]), f"{r['h10']} %", med(r["hmed"]),
                        f"{r['f10']} %", med(r["fmed"])] for r in d]), ""]
 
-    worst = rows(cur, f"""
-        SELECT m.name, m.district, sp.pop, a.pct_le_10, a.median_min, f.median_min AS fire_med,
-               round(sp.candidate_m2 / NULLIF(sp.pop, 0), 2) AS m2pp
-        FROM {s}.mahalle m JOIN {s}.mahalle_space sp USING (osm_id)
-        JOIN {s}.summary a ON a.level = 'mahalle' AND a.key = m.osm_id::text AND a.target = 'walk_assembly_any'
-        JOIN {s}.summary f ON f.level = 'mahalle' AND f.key = m.osm_id::text AND f.target = 'drive_fire'
-        WHERE sp.pop >= 1000
-        ORDER BY a.pct_le_10, a.median_min DESC NULLS FIRST
-        LIMIT 15""")
+    def weakest(min_pop: int, limit: int) -> list[dict]:
+        return rows(cur, f"""
+            SELECT m.name, m.district, sp.pop, a.pct_le_10, a.median_min, f.median_min AS fire_med,
+                   round(sp.candidate_m2 / NULLIF(sp.pop, 0), 2) AS m2pp
+            FROM {s}.mahalle m JOIN {s}.mahalle_space sp USING (osm_id)
+            JOIN {s}.summary a ON a.level = 'mahalle' AND a.key = m.osm_id::text AND a.target = 'walk_assembly_any'
+            JOIN {s}.summary f ON f.level = 'mahalle' AND f.key = m.osm_id::text AND f.target = 'drive_fire'
+            WHERE sp.pop >= %s
+            ORDER BY a.pct_le_10, a.median_min DESC NULLS FIRST
+            LIMIT %s""", [min_pop, limit])
+
+    head = ["Neighbourhood", "district", "population", "walk ≤ 10 min", "walk median", "fire median", "candidate m² / person"]
+    line = lambda r: [r["name"], r["district"], float(r["pop"]), f"{r['pct_le_10']} %", med(r["median_min"]),
+                      med(r["fire_med"]), jnum(r["m2pp"])]
     out += ["## Neighbourhoods with the weakest walking access", "",
-            "Neighbourhoods with at least 1,000 residents, sorted by the share within a 10-minute walk of an assembly-area candidate.", "",
-            md_table(["Neighbourhood", "district", "population", "walk ≤ 10 min", "walk median", "fire median", "candidate m² / person"],
-                     [[r["name"], r["district"], float(r["pop"]), f"{r['pct_le_10']} %", med(r["median_min"]),
-                       med(r["fire_med"]), jnum(r["m2pp"])] for r in worst]), ""]
+            "### Urban neighbourhoods (≥ 10,000 residents)", "",
+            "Sorted by the share of residents within a 10-minute walk of an assembly-area candidate.", "",
+            md_table(head, [line(r) for r in weakest(10_000, 15)]), "",
+            "### All neighbourhoods (≥ 1,000 residents)", "",
+            "Most are former villages on the urban edge (*mahalle* since the 2012 metropolitan law), where OSM rarely maps "
+            "a school yard or village square, so part of this gap is a mapping gap.", "",
+            md_table(head, [line(r) for r in weakest(1_000, 10)]), ""]
 
     chk = rows(cur, "SELECT * FROM report.district_population_check WHERE area = %s ORDER BY district", [s])
     out += ["## Check: WorldPop vs TÜİK district totals", "",

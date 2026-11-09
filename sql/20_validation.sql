@@ -16,7 +16,9 @@ WITH official AS (
   LEFT JOIN src.kadikoy_per_capita_raw p ON src.name_key(p.mahalle) = src.name_key(a.mahalle)
   WHERE src.name_key(a.mahalle) NOT IN ('', 'MAHALLE', 'MAHALLEADI', 'TOPLAM', 'GENELTOPLAM')
 ), osm AS (
-  SELECT src.name_key(name) AS k, name AS osm_name, n_candidates, candidate_m2, pop AS worldpop_2025
+  -- OSM writes some names with digits: "19 Mayıs" for the official "On Dokuz Mayıs"
+  SELECT replace(src.name_key(name), '19MAYIS', 'ONDOKUZMAYIS') AS k,
+         name AS osm_name, n_candidates, candidate_m2, pop AS worldpop_2025
   FROM :"s".mahalle_space
 )
 SELECT o.mahalle, osm.osm_name, o.official_count, o.official_m2, o.official_pop_2022,

@@ -55,10 +55,15 @@ arrival. Lines show how many residents' routes use each street segment. Generate
    against 150 official areas and 1.16 million m² (43 % more surface). The neighbourhood ranking agrees
    moderately (Spearman 0.63). The surplus comes mostly from large coastal and district parks that the
    municipality does not count in full (Fenerbahçe: 180,000 m² in OSM vs 9,400 m² official).
-5. **WorldPop is reliable at this scale.** Kadıköy: 487,500 (WorldPop 2025) vs 483,100 (official 2022), Spearman
+5. **Evacuation would crowd on a few streets.** Summing every resident's shortest walking route gives the
+   load of each street. Outside the industrial zone at the top of the list (ASO Bulvarı in Sincan's
+   organised industrial zone, where WorldPop places residents in factory buildings), the busiest residential
+   streets carry 9,000+ people each: Oğuz Caddesi (Sincan), 2473. and 2500. Cadde (Etimesgut). These are
+   candidates for wider sidewalks, signage or an additional assembly area nearby.
+6. **WorldPop is reliable at this scale.** Kadıköy: 487,500 (WorldPop 2025) vs 483,100 (official 2022), Spearman
    0.95 across neighbourhoods. Ankara districts: 1.02–1.08 × the TÜİK 2021 register, consistent with four years of growth.
 
-Full tables, including every district and the 25 weakest neighbourhoods: [`results/RESULTS.md`](results/RESULTS.md).
+Full tables, including every district, the 25 weakest neighbourhoods and the 15 busiest streets: [`results/RESULTS.md`](results/RESULTS.md).
 
 ## Why open data, and what that means
 
@@ -233,7 +238,8 @@ rotası üzerinde olduğu da hesaplanır; böylece tahliyede ilk sıkışacak ca
 
 **Öne çıkan sonuçlar:** Nüfusun %86,7'si en yakın toplanma alanı adayına 10 dakikada yürüyebiliyor; en
 zayıf ilçe Gölbaşı (%49,9). OpenStreetMap'te Ankara'nın resmî toplanma alanları neredeyse hiç yok (yalnızca
-14 nokta). Kadıköy'de OSM adayları resmî listeden %43 daha fazla alan veriyor; mahalle sıralaması orta
+14 nokta). Tahliyede en çok yük binecek caddeler, sanayi bölgesi dışında, Sincan'da Oğuz Caddesi ile
+Etimesgut'ta 2473. ve 2500. Cadde (her biri 9.000'den fazla kişi). Kadıköy'de OSM adayları resmî listeden %43 daha fazla alan veriyor; mahalle sıralaması orta
 düzeyde uyuşuyor (Spearman 0,63). WorldPop nüfusu ise resmî nüfusla neredeyse birebir örtüşüyor (%0,9 fark).
 
 Kurulum: `docker compose run --rm pipeline make all`. Tüm analiz SQL'dedir (PostGIS + pgRouting).

@@ -73,9 +73,9 @@ def main() -> None:
         txt = ax.text(0.02, 1.02, "", transform=ax.transAxes, fontsize=10.5, va="bottom", color="#1d2433")
         ax.set_title(label, fontsize=12, pad=22, color=col, fontweight="bold")
         state.append((tracks, moving, done, txt))
-    fig.text(0.01, 0.015, "Dots: residents sampled by population, on their shortest street route (green = arrived). "
-             "Lines: residents per street segment. Fire stations in OSM are incomplete: fire times are upper bounds. "
-             f"Data © OpenStreetMap contributors, WorldPop. Built {meta['generated']}.", fontsize=7.5, color="#5b6475")
+    fig.text(0.01, 0.015, "Dots: residents sampled by population on their shortest street route (green = arrived). "
+             "Lines: residents per street segment. OSM fire stations are incomplete, so fire times are upper bounds. "
+             f"© OpenStreetMap contributors, WorldPop · {meta['generated']}", fontsize=7, color="#5b6475")
 
     def frame(i):
         t = min(i, FRAMES) / FRAMES * T_END

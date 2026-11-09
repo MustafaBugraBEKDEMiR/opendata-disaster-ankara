@@ -7,7 +7,7 @@ SET search_path = :"s", public;
 CREATE TABLE edges_raw (
   way_id bigint, source bigint, target bigint,
   walk boolean, drive_fw boolean, drive_bw boolean,
-  speed_kmh real, highway text, wkt text
+  speed_kmh real, highway text, name text, wkt text
 );
 CREATE TABLE cells_raw (cell_id bigint, lon double precision, lat double precision, pop double precision);
 CREATE TABLE facility_raw (doc jsonb);

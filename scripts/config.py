@@ -36,7 +36,7 @@ VALIDATION = {
 }
 
 # --------------------------------------------------------------------------- assumptions
-WALK_SPEED_KMH = 4.0        # walking speed after an earthquake (crowds, debris, elderly people)
+WALK_SPEED_KMH = 4.0        # walking speed in an evacuation (crowds, debris, children and elderly people)
 DRIVE_SPEED_DEFAULT = {     # free-flow km/h when OSM has no usable maxspeed tag
     "motorway": 100, "motorway_link": 60, "trunk": 80, "trunk_link": 50,
     "primary": 60, "primary_link": 40, "secondary": 50, "secondary_link": 40,
@@ -49,6 +49,10 @@ FACILITY_ENTRY_M = 25       # a park/school polygon can be entered from every ro
 MAX_COST_S = 3600           # routing stops after 60 min; slower cells are reported as "> 60 min"
 THRESHOLDS_MIN = [5, 10, 15]
 MIN_PARK_M2 = 1000          # parks smaller than this are not counted as assembly-area candidates
+SIM_AGENTS = 1500           # residents drawn per scenario for the animated routes (by population weight)
+FLOW_EDGES_WALK = 6000      # busiest street segments exported to the web map, walking scenario
+FLOW_EDGES_DRIVE = 3000     # … hospital and fire scenarios
+SIM_SEED = 2026             # fixed, so the same residents are drawn on every run
 WEB_GRID_M = 500            # cell size of the web-map grid (the analysis itself uses the 100 m WorldPop grid)
 
 # --------------------------------------------------------------------------- sources
@@ -97,7 +101,7 @@ SOURCES = {
     },
 }
 
-# Facility kinds. "assembly" kinds are candidates for a post-earthquake assembly area.
+# Facility kinds. "assembly" kinds are candidates for a disaster assembly area (afet ve acil durum toplanma alanı).
 FACILITY_KINDS = {
     "assembly_point": {"assembly": True,  "label": "Assembly point (OSM emergency=assembly_point)"},
     "park":           {"assembly": True,  "label": f"Park ≥ {MIN_PARK_M2} m² (OSM leisure=park)"},

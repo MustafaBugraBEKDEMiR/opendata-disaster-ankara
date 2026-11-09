@@ -15,7 +15,9 @@ from pathlib import Path
 
 import psycopg2
 
-from config import (DOCS_DATA, FACILITY_ENTRY_M, FACILITY_KINDS, MAX_SNAP_M, MIN_PARK_M2, RAW,
+import simulate
+
+from config import (DOCS_DATA, FLOW_EDGES_DRIVE, FLOW_EDGES_WALK, FACILITY_ENTRY_M, FACILITY_KINDS, MAX_SNAP_M, MIN_PARK_M2, RAW,
                     RESULTS, SNAP_SPEED_KMH, STUDY, VALIDATION, WALK_SPEED_KMH, WEB_GRID_M)
 
 TARGETS = {
@@ -96,6 +98,24 @@ def export_web(cur, s: str, epsg: int) -> None:
         FROM {s}.facility
         ORDER BY kind
     """))
+
+    # Street segments carrying the most residents' routes (from the shortest-path trees).
+    write_json(DOCS_DATA / "flows.geojson", feature_collection(cur, f"""
+        WITH l AS (
+          SELECT *, row_number() OVER (PARTITION BY target ORDER BY pop DESC) AS rn
+          FROM {s}.edge_load
+        )
+        SELECT CASE l.target WHEN 'walk_assembly_any' THEN 'walk' WHEN 'drive_hospital' THEN 'hospital'
+                             ELSE 'fire' END AS t,
+               round(l.pop::numeric) AS p,
+               ST_AsGeoJSON(ST_Transform(e.geom_m, 4326), 5) AS geometry
+        FROM l JOIN {s}.edges e ON e.id = l.edge_id
+        WHERE l.rn <= CASE l.target WHEN 'walk_assembly_any' THEN %(nw)s ELSE %(nd)s END
+        ORDER BY l.pop
+    """, {"nw": FLOW_EDGES_WALK, "nd": FLOW_EDGES_DRIVE}))
+
+    sim = simulate.agents(cur.connection, s)
+    write_json(DOCS_DATA / "sim.json", sim)
 
     write_json(DOCS_DATA / "districts.geojson", feature_collection(cur, f"""
         SELECT name, ST_AsGeoJSON(ST_Transform(ST_SimplifyPreserveTopology(geom_m, 30), 4326), 5) AS geometry
@@ -196,6 +216,23 @@ def results_md(cur, s: str, v: str) -> tuple[str, dict]:
             "Most are former villages on the urban edge (*mahalle* since the 2012 metropolitan law), where OSM rarely maps "
             "a school yard or village square, so part of this gap is a mapping gap.", "",
             md_table(head, [line(r) for r in weakest(1_000, 10)]), ""]
+
+    streets = rows(cur, f"""
+        SELECT e.name, d.name AS district, round(max(l.pop)::numeric) AS evacuees,
+               round(sum(e.length_m)::numeric) AS length_m
+        FROM {s}.edge_load l
+        JOIN {s}.edges e ON e.id = l.edge_id
+        JOIN {s}.district d ON ST_Intersects(d.geom_m, ST_LineInterpolatePoint(e.geom_m, 0.5))
+        WHERE l.target = 'walk_assembly_any' AND e.name IS NOT NULL
+        GROUP BY e.name, d.name
+        ORDER BY max(l.pop) DESC
+        LIMIT 15""")
+    out += ["## Streets that would carry the most people on foot", "",
+            "Every resident walks the shortest route to the nearest assembly-area candidate; the load of a street "
+            "segment is the number of residents whose route uses it. The table shows the busiest segment of each "
+            "named street. These are the streets where an evacuation would crowd first.", "",
+            md_table(["Street", "district", "residents on the busiest segment"],
+                     [[r["name"], r["district"], float(r["evacuees"])] for r in streets]), ""]
 
     chk = rows(cur, "SELECT * FROM report.district_population_check WHERE area = %s ORDER BY district", [s])
     out += ["## Check: WorldPop vs TÜİK district totals", "",

@@ -140,7 +140,7 @@ def build_edges(pbf: Path, out: Path) -> dict:
     junctions (nodes shared by two or more kept ways). Vertex ids are OSM node ids,
     so the graph can be traced back to the map.
     """
-    ways = []                      # (way_id, walk, fw, bw, speed, highway, refs, lons, lats)
+    ways = []                      # (way_id, walk, fw, bw, speed, highway, name, refs, lons, lats)
     use = Counter()
     for w in osmium.FileProcessor(str(pbf)).with_locations().with_filter(osmium.filter.KeyFilter("highway")):
         if not w.is_way():
@@ -158,7 +158,8 @@ def build_edges(pbf: Path, out: Path) -> dict:
             continue                   # a node outside the extract; the way is cut at the border
         if len(refs) < 2:
             continue
-        ways.append((w.id, walk, fw, bw, speed_kmh(t), t["highway"], refs, lons, lats))
+        ways.append((w.id, walk, fw, bw, speed_kmh(t), t["highway"], (t.get("name") or "").replace("\t", " "),
+                     refs, lons, lats))
         use.update(refs)
         use[refs[0]] += 1              # endpoints are always vertices
         use[refs[-1]] += 1
@@ -167,15 +168,15 @@ def build_edges(pbf: Path, out: Path) -> dict:
     with open(out, "w", newline="", encoding="utf-8") as f:
         wr = csv.writer(f, delimiter="\t", lineterminator="\n")
         wr.writerow(["way_id", "source", "target", "walk", "drive_fw", "drive_bw",
-                     "speed_kmh", "highway", "wkt"])
-        for way_id, walk, fw, bw, spd, hw, refs, lons, lats in ways:
+                     "speed_kmh", "highway", "name", "wkt"])
+        for way_id, walk, fw, bw, spd, hw, name, refs, lons, lats in ways:
             start = 0
             for i in range(1, len(refs)):
                 if use[refs[i]] > 1 or i == len(refs) - 1:
                     if refs[start] != refs[i]:     # skip zero-length self loops
                         pts = ",".join(f"{lons[j]:.7f} {lats[j]:.7f}" for j in range(start, i + 1))
                         wr.writerow([way_id, refs[start], refs[i], int(walk), int(fw), int(bw),
-                                     spd, hw, f"LINESTRING({pts})"])
+                                     spd, hw, name, f"LINESTRING({pts})"])
                         stats["edges"] += 1
                         stats["walk"] += walk
                         stats["drive"] += fw or bw

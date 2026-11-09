@@ -44,10 +44,11 @@ jobs:
       - name: Build database and route
         run: python -u scripts/build.py
 
-      - name: Export web map, results and figure
+      - name: Export web map, simulation, results, figure and GIF
         run: |
           python scripts/export_web.py
           python scripts/make_figure.py
+          python scripts/make_gif.py
           cp data/raw/SOURCES.json results/SOURCES.json
 
       - name: Upload results as an artifact

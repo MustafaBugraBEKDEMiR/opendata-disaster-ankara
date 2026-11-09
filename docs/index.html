@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Emergency access in Ankara · Afet erişilebilirliği</title>
+<title>opendata-disaster-ankara · Disaster access in Ankara · Afet erişilebilirliği</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -12,28 +12,36 @@
   :root { --ink:#1d2433; --muted:#5b6475; --line:#e3e6ec; --bg:#fff; --accent:#2c5fa8; }
   * { box-sizing: border-box; }
   html, body { margin:0; height:100%; font:14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--ink); }
-  #map { position:absolute; inset:0 0 0 360px; }
+  #map { position:absolute; inset:0 0 0 360px; background:#eef0f3; }
   #panel { position:absolute; top:0; left:0; bottom:0; width:360px; overflow-y:auto; background:var(--bg);
            border-right:1px solid var(--line); padding:18px 18px 24px; }
   h1 { font-size:19px; margin:0 0 2px; line-height:1.25; }
-  .sub { color:var(--muted); margin:0 0 14px; }
+  .sub { color:var(--muted); margin:0 0 12px; }
   h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:18px 0 6px; }
-  select, .seg button { font:inherit; }
+  select, button { font:inherit; }
   select { width:100%; padding:7px 8px; border:1px solid var(--line); border-radius:6px; background:#fff; }
   .seg { display:flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
   .seg button { flex:1; border:0; background:#fff; padding:6px 0; cursor:pointer; color:var(--muted); }
   .seg button.on { background:var(--accent); color:#fff; }
   .seg button:disabled { opacity:.4; cursor:not-allowed; }
+  .tabs { display:flex; gap:6px; margin:4px 0 2px; }
+  .tabs button { flex:1; padding:8px 0; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer; font-weight:600; color:var(--muted); }
+  .tabs button.on { border-color:var(--accent); color:var(--accent); background:#eef3fb; }
   .legend div { display:flex; align-items:center; gap:8px; margin:2px 0; }
   .legend i { width:18px; height:12px; border-radius:2px; display:inline-block; }
   .stat { display:grid; grid-template-columns: 1fr auto; gap:3px 10px; }
   .stat b { font-variant-numeric: tabular-nums; text-align:right; }
   .bar { height:8px; background:#eef0f4; border-radius:4px; overflow:hidden; margin:3px 0 8px; }
-  .bar span { display:block; height:100%; background:var(--accent); }
+  .bar span { display:block; height:100%; background:var(--accent); transition: width .2s; }
   label.chk { display:flex; align-items:center; gap:6px; margin:3px 0; cursor:pointer; }
   .dot { width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #fff; box-shadow:0 0 0 1px #0003; }
   .note { color:var(--muted); font-size:12.5px; }
   .note a { color:var(--accent); }
+  .ctrl { display:flex; gap:6px; margin-top:8px; }
+  .ctrl button { padding:6px 10px; border:1px solid var(--line); border-radius:6px; background:#fff; cursor:pointer; }
+  .ctrl button.primary { background:var(--accent); border-color:var(--accent); color:#fff; flex:1; }
+  .clock { font-size:28px; font-weight:700; font-variant-numeric: tabular-nums; margin:10px 0 0; }
+  .hidden { display:none; }
   .leaflet-tooltip { font-size:13px; }
   #empty { display:none; position:absolute; inset:0 0 0 360px; place-items:center; color:var(--muted); z-index:999;
            background:#fafbfc; text-align:center; padding:20px; }
@@ -45,24 +53,56 @@
 </head>
 <body>
 <div id="panel">
-  <h1>How fast can people reach help after an earthquake?</h1>
-  <p class="sub">Ankara · 9 central districts · open data only<br><span lang="tr">Deprem sonrası toplanma alanına, hastaneye ve itfaiyeye erişim</span></p>
+  <h1>How fast can people reach safety and help in a disaster?</h1>
+  <p class="sub">Ankara · 9 central districts · open data only<br><span lang="tr">Afet anında toplanma alanına, hastaneye ve itfaiyeye erişim</span></p>
 
-  <h2>Measure</h2>
-  <select id="target"></select>
-
-  <h2>View</h2>
-  <div class="seg" id="view">
-    <button data-v="grid" class="on">500 m grid</button>
-    <button data-v="mahalle">Neighbourhoods</button>
+  <div class="tabs" id="tabs">
+    <button data-m="access" class="on">Access map</button>
+    <button data-m="sim">Simulation</button>
   </div>
-  <p class="note" id="viewnote"></p>
 
-  <h2>Minutes</h2>
-  <div class="legend" id="legend"></div>
+  <!-- ------------------------------------------------ access map -->
+  <div id="accessUI">
+    <h2>Measure</h2>
+    <select id="target"></select>
 
-  <h2>Whole area</h2>
-  <div id="stats"></div>
+    <h2>View</h2>
+    <div class="seg" id="view">
+      <button data-v="grid" class="on">500 m grid</button>
+      <button data-v="mahalle">Neighbourhoods</button>
+    </div>
+    <p class="note" id="viewnote"></p>
+
+    <h2>Minutes</h2>
+    <div class="legend" id="legend"></div>
+
+    <h2>Whole area</h2>
+    <div id="stats"></div>
+  </div>
+
+  <!-- ------------------------------------------------ simulation -->
+  <div id="simUI" class="hidden">
+    <h2>Scenario</h2>
+    <select id="scenario"></select>
+    <p class="note" id="simnote"></p>
+    <div class="clock" id="clock">0:00</div>
+    <div class="note">minutes after the alarm</div>
+    <div class="ctrl">
+      <button class="primary" id="play">▶ Play</button>
+      <button id="restart" title="Restart">↺</button>
+      <select id="speed" style="width:auto">
+        <option value="30">½ min / s</option>
+        <option value="60" selected>1 min / s</option>
+        <option value="120">2 min / s</option>
+      </select>
+    </div>
+    <h2>Arrived</h2>
+    <div id="arrived"></div>
+    <h2>Street load</h2>
+    <label class="chk"><input type="checkbox" id="showFlows" checked> Show the streets the routes use</label>
+    <p class="note">Line width = residents whose shortest route uses the segment (all residents, not only the
+      animated sample). Thick lines are where people would crowd first.</p>
+  </div>
 
   <h2>Facilities (OpenStreetMap)</h2>
   <div id="facil"></div>
@@ -70,12 +110,12 @@
   <h2>About</h2>
   <p class="note">
     Population: WorldPop 2025 (100 m, CC BY 4.0). Roads and facilities: © OpenStreetMap contributors (ODbL).
-    Walking at <span id="speed">4</span> km/h along the street network; driving at free-flow speed.
-    Parks, school grounds and mapped assembly points are <em>candidates</em>: the official AFAD list of
-    assembly areas is not published as open data.
+    Walking at <span id="speed-kmh">4</span> km/h along the street network; driving at free-flow speed.
+    Parks, school grounds and mapped assembly points are <em>candidates</em>: the official list of
+    assembly areas is not published as open data for Ankara.
     <br><br>
-    Method, limitations and code: <a href="https://github.com/MustafaBugraBEKDEMiR/emergency-access-tr">GitHub repository</a> ·
-    <a href="https://github.com/MustafaBugraBEKDEMiR/emergency-access-tr/blob/main/results/RESULTS.md">all results</a><br>
+    Method, limitations and code: <a href="https://github.com/MustafaBugraBEKDEMiR/opendata-disaster-ankara">GitHub repository</a> ·
+    <a href="https://github.com/MustafaBugraBEKDEMiR/opendata-disaster-ankara/blob/main/results/RESULTS.md">all results</a><br>
     <span id="generated"></span>
   </p>
 </div>
@@ -90,7 +130,14 @@ const FAC = {
   assembly_point: ['Assembly point', '#1b9e77'], park: ['Park', '#66a61e'], school: ['School', '#e6ab02'],
   hospital: ['Hospital', '#d62728'], fire_station: ['Fire station', '#ff7f0e'],
 };
-// grid property → mahalle property (median), where one exists
+const SIM = {   // scenario → colour, facilities shown, text
+  walk:     { color: '#2c5fa8', fac: ['park', 'school', 'assembly_point'],
+              note: 'A sample of residents (drawn by population) walk the shortest street route to the nearest park, school ground or assembly point at 4 km/h.' },
+  hospital: { color: '#d62728', fac: ['hospital'],
+              note: 'Residents are driven to the nearest hospital at free-flow speed, one-way streets respected.' },
+  fire:     { color: '#ff7f0e', fac: ['fire_station'],
+              note: 'Fire engines leave the nearest station for each home. OSM maps only 15 stations here; the real network is larger, so these are upper bounds.' },
+};
 const MAHALLE_FIELD = { w_any: 'w_any_med', d_hosp: 'd_hosp_med', d_fire: 'd_fire_med' };
 const STAT_KEY = { w_any: 'walk_assembly_any', w_pt: 'walk_assembly_point', w_park: 'walk_park',
                    w_sch: 'walk_school', d_hosp: 'drive_hospital', d_fire: 'drive_fire' };
@@ -99,38 +146,43 @@ const STAT_KEY = { w_any: 'walk_assembly_any', w_pt: 'walk_assembly_point', w_pa
 const color = m => { const i = m == null ? -1 : BREAKS.findIndex(b => m <= b); return COLORS[i === -1 ? 5 : i]; };
 const fmt = n => n == null ? '–' : Number(n).toLocaleString('en-US');
 const fmtMin = m => m == null || m > 60 ? '> 60 min' : `${m} min`;
+const clock = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
-const map = L.map('map', { preferCanvas: true }).setView([39.93, 32.78], 11)   // urban core; zoom out for the whole area;
+const map = L.map('map', { preferCanvas: true }).setView([39.93, 32.78], 11);   // urban core
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   maxZoom: 19, subdomains: 'abcd',
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
 }).addTo(map);
 
-let state = { target: 'w_any', view: 'grid' };
-let meta, grid, mahalle, facilities, districts, layer, facLayers = {};
+let state = { mode: 'access', target: 'w_any', view: 'grid', scenario: 'walk' };
+let meta, grid, mahalle, facilities, districts, flows, sim, layer, flowLayer, facLayers = {};
 
 const get = f => fetch(f).then(r => r.ok ? r.json() : null).catch(() => null);
 
-Promise.all(['meta.json', 'grid.geojson', 'mahalle.geojson', 'facilities.geojson', 'districts.geojson']
-  .map(f => get('data/' + f))).then(([m, g, mh, fc, d]) => {
+Promise.all(['meta.json', 'grid.geojson', 'mahalle.geojson', 'facilities.geojson', 'districts.geojson', 'flows.geojson', 'sim.json']
+  .map(f => get('data/' + f))).then(([m, g, mh, fc, d, fl, sm]) => {
   if (!m || !g || !g.features.length) { document.getElementById('empty').style.display = 'grid'; return; }
-  [meta, grid, mahalle, facilities, districts] = [m, g, mh, fc, d];
+  [meta, grid, mahalle, facilities, districts, flows, sim] = [m, g, mh, fc, d, fl, sm];
+
   const sel = document.getElementById('target');
   for (const [k, label] of Object.entries(meta.targets)) sel.add(new Option(label, k));
   sel.onchange = () => { state.target = sel.value; draw(); };
   document.querySelectorAll('#view button').forEach(b => b.onclick = () => {
     if (b.disabled) return; state.view = b.dataset.v; draw();
   });
-  document.getElementById('speed').textContent = meta.walk_speed_kmh;
+  document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => setMode(b.dataset.m));
+  document.getElementById('speed-kmh').textContent = meta.walk_speed_kmh;
   document.getElementById('generated').textContent = `Data built ${meta.generated}.`;
-  document.getElementById('legend').innerHTML = COLORS.map((c, i) => `<div><i style="background:${c}"></i>${LABELS[i]}</div>`).join('')
-;
+  document.getElementById('legend').innerHTML = COLORS.map((c, i) => `<div><i style="background:${c}"></i>${LABELS[i]}</div>`).join('');
 
   if (districts) L.geoJSON(districts, { style: { color: '#1d2433', weight: 1.2, fill: false, opacity: .6 }, interactive: false }).addTo(map);
   buildFacilities();
+  initSim();
   draw();
+  if (location.hash === '#sim') setMode('sim');
 });
 
+// ------------------------------------------------------------------ access map
 function draw() {
   const mf = MAHALLE_FIELD[state.target];
   const mBtn = document.querySelector('#view button[data-v="mahalle"]');
@@ -159,8 +211,7 @@ function draw() {
       },
     });
   }
-  layer.addTo(map);
-  layer.bringToBack();
+  if (state.mode === 'access') { layer.addTo(map); layer.bringToBack(); }
   stats();
 }
 
@@ -183,13 +234,154 @@ function buildFacilities() {
         color: '#fff', weight: 1, fillColor: c, fillOpacity: .95 }),
       onEachFeature: (f, l) => l.bindTooltip(`${label}${f.properties.name ? ': ' + f.properties.name : ''}`),
     });
-    const on = kind === 'hospital' || kind === 'fire_station' || kind === 'assembly_point';
-    if (on) facLayers[kind].addTo(map);
-    box.insertAdjacentHTML('beforeend', `<label class="chk"><input type="checkbox" data-k="${kind}" ${on ? 'checked' : ''}>
+    box.insertAdjacentHTML('beforeend', `<label class="chk"><input type="checkbox" data-k="${kind}">
       <span class="dot" style="background:${c}"></span>${label} <span class="note">(${fmt(feats.length)})</span></label>`);
   }
   box.querySelectorAll('input').forEach(i => i.onchange = () =>
     i.checked ? facLayers[i.dataset.k].addTo(map) : map.removeLayer(facLayers[i.dataset.k]));
+  showFacilities(['hospital', 'fire_station', 'assembly_point']);
+}
+
+function showFacilities(kinds) {
+  document.querySelectorAll('#facil input').forEach(i => {
+    i.checked = kinds.includes(i.dataset.k);
+    i.checked ? facLayers[i.dataset.k].addTo(map) : map.removeLayer(facLayers[i.dataset.k]);
+  });
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.m === mode));
+  document.getElementById('accessUI').classList.toggle('hidden', mode !== 'access');
+  document.getElementById('simUI').classList.toggle('hidden', mode !== 'sim');
+  if (mode === 'sim') {
+    if (layer) map.removeLayer(layer);
+    agentLayer.addTo(map);
+    setScenario(state.scenario);
+    play(true);
+  } else {
+    play(false);
+    map.removeLayer(agentLayer);
+    if (flowLayer) map.removeLayer(flowLayer);
+    showFacilities(['hospital', 'fire_station', 'assembly_point']);
+    draw();
+  }
+}
+
+// ------------------------------------------------------------------ simulation
+// Each agent is a flat array [t0, lon0, lat0, t1, lon1, lat1, …] (seconds after the alarm).
+const AgentLayer = L.Layer.extend({
+  onAdd(m) {
+    this._c = L.DomUtil.create('canvas', 'leaflet-zoom-hide');
+    this._c.style.pointerEvents = 'none';
+    m.getPanes().overlayPane.appendChild(this._c);
+    m.on('move zoom resize viewreset', this._reset, this);
+    this._reset();
+  },
+  onRemove(m) { this._c.remove(); m.off('move zoom resize viewreset', this._reset, this); },
+  _reset() {
+    const s = map.getSize();
+    L.DomUtil.setPosition(this._c, map.containerPointToLayerPoint([0, 0]));
+    const r = window.devicePixelRatio || 1;
+    this._c.width = s.x * r; this._c.height = s.y * r;
+    this._c.style.width = s.x + 'px'; this._c.style.height = s.y + 'px';
+    this._c.getContext('2d').setTransform(r, 0, 0, r, 0, 0);
+    this.render();
+  },
+  render() {
+    if (!this._c || !sim) return;
+    const ctx = this._c.getContext('2d'), s = map.getSize();
+    ctx.clearRect(0, 0, s.x, s.y);
+    const sc = sim[state.scenario]; if (!sc) return;
+    const col = SIM[state.scenario].color;
+    let arrived = 0;
+    for (let k = 0; k < sc.agents.length; k++) {
+      const a = sc.agents[k], n = a.length;
+      let x, y, done = false;
+      if (simT >= a[n - 3]) { x = a[n - 2]; y = a[n - 1]; done = true; arrived++; }
+      else {
+        let i = cursor[k] || 0;
+        while (i + 3 < n && a[i + 3] <= simT) i += 3;
+        while (i > 0 && a[i] > simT) i -= 3;
+        cursor[k] = i;
+        const f = (simT - a[i]) / Math.max(a[i + 3] - a[i], 1e-6);
+        x = a[i + 1] + (a[i + 4] - a[i + 1]) * f; y = a[i + 2] + (a[i + 5] - a[i + 2]) * f;
+      }
+      const p = map.latLngToContainerPoint([y, x]);
+      if (p.x < -5 || p.y < -5 || p.x > s.x + 5 || p.y > s.y + 5) continue;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, done ? 2 : 3, 0, 2 * Math.PI);
+      ctx.fillStyle = done ? '#1b9e7799' : col;
+      ctx.fill();
+      if (!done) { ctx.lineWidth = .8; ctx.strokeStyle = '#fff'; ctx.stroke(); }
+    }
+    updateArrived(arrived, sc.agents.length);
+  },
+});
+const agentLayer = new AgentLayer();
+let simT = 0, playing = false, last = null, cursor = [];
+
+function initSim() {
+  const sel = document.getElementById('scenario');
+  if (!sim) { document.querySelector('#tabs button[data-m="sim"]').disabled = true; return; }
+  for (const [k, sc] of Object.entries(sim)) sel.add(new Option(sc.label, k));
+  sel.onchange = () => setScenario(sel.value);
+  document.getElementById('play').onclick = () => play(!playing);
+  document.getElementById('restart').onclick = () => { simT = 0; cursor = []; agentLayer.render(); tickClock(); play(true); };
+  document.getElementById('showFlows').onchange = () => drawFlows();
+}
+
+function setScenario(k) {
+  state.scenario = k;
+  document.getElementById('scenario').value = k;
+  document.getElementById('simnote').textContent = SIM[k].note +
+    ` ${fmt(sim[k].agents.length)} residents are animated.`;
+  simT = 0; cursor = [];
+  showFacilities(SIM[k].fac);
+  drawFlows();
+  agentLayer.render(); tickClock();
+}
+
+function drawFlows() {
+  if (flowLayer) map.removeLayer(flowLayer);
+  if (!flows || !document.getElementById('showFlows').checked || state.mode !== 'sim') return;
+  const feats = flows.features.filter(f => f.properties.t === state.scenario);
+  const max = Math.max(...feats.map(f => f.properties.p), 1);
+  flowLayer = L.geoJSON({ type: 'FeatureCollection', features: feats }, {
+    style: f => ({ color: SIM[state.scenario].color, opacity: .25 + .5 * Math.sqrt(f.properties.p / max),
+                   weight: .6 + 7 * Math.sqrt(f.properties.p / max), lineCap: 'round' }),
+    onEachFeature: (f, l) => l.bindTooltip(`${fmt(f.properties.p)} residents' routes use this segment`, { sticky: true }),
+  }).addTo(map);
+  flowLayer.bringToBack();
+}
+
+function play(on) {
+  playing = on;
+  document.getElementById('play').textContent = on ? '❚❚ Pause' : '▶ Play';
+  last = null;
+  if (on) requestAnimationFrame(step);
+}
+
+function step(ts) {
+  if (!playing || state.mode !== 'sim') return;
+  if (last != null) {
+    const speed = +document.getElementById('speed').value;
+    simT += (ts - last) / 1000 * speed;
+    const end = Math.min(sim[state.scenario].max_s, 30 * 60);
+    if (simT > end + 2 * speed) { simT = 0; cursor = []; }         // loop after a short pause
+  }
+  last = ts;
+  agentLayer.render(); tickClock();
+  requestAnimationFrame(step);
+}
+
+function tickClock() { document.getElementById('clock').textContent = clock(Math.min(simT, sim[state.scenario].max_s)); }
+
+function updateArrived(n, total) {
+  const pct = total ? Math.round(100 * n / total) : 0;
+  document.getElementById('arrived').innerHTML =
+    `<div class="stat"><span>${fmt(n)} of ${fmt(total)} animated residents</span><b>${pct} %</b></div>` +
+    `<div class="bar"><span style="width:${pct}%"></span></div>`;
 }
 </script>
 </body>

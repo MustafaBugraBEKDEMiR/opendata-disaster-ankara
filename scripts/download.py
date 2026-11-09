@@ -18,7 +18,7 @@ import urllib.request
 
 from config import RAW, SOURCES
 
-UA = "emergency-access-tr (https://github.com/MustafaBugraBEKDEMiR/emergency-access-tr)"
+UA = "opendata-disaster-ankara (https://github.com/MustafaBugraBEKDEMiR/opendata-disaster-ankara)"
 
 
 def sha256(path) -> str:

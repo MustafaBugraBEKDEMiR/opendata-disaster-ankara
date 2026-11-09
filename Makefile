@@ -12,6 +12,7 @@ build:
 export:
 	$(PY) scripts/export_web.py
 	$(PY) scripts/make_figure.py
+	$(PY) scripts/make_gif.py
 test:
 	$(PY) tests/run_tests.py
 

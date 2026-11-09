@@ -30,6 +30,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import build                                     # noqa: E402
 import prepare                                   # noqa: E402
+import simulate                                  # noqa: E402
 from config import SOURCES, WALK_SPEED_KMH       # noqa: E402
 
 LON0, LAT0 = 32.80, 39.90            # grid origin (south-west junction)
@@ -170,6 +171,7 @@ def main() -> None:
         build.load_area(conn, AREA, work)
         for f in build.AREA_SQL:
             build.psql(f, **build.area_vars(AREA))
+        simulate.compute_loads(conn, AREA["key"])
         build.psql("20_validation.sql", s=AREA["key"])
         cur = conn.cursor()
 
@@ -222,6 +224,26 @@ def main() -> None:
         fire44 = one("SELECT cost_s FROM testgrid.node_access WHERE target = 'drive_fire' AND vertex_id = %s",
                      node_id(4, 4))
         check("fire station → (4,4) along row 4 = 4 blocks", near(fire44, 4 * 111.0 / (30 / 3.6), 3))
+
+        # routes & street loads --------------------------------------------
+        col0 = [one("SELECT id FROM testgrid.edges WHERE (source, target) IN ((%s, %s), (%s, %s))",
+                    node_id(r, 0), node_id(r + 1, 0), node_id(r + 1, 0), node_id(r, 0)) for r in range(3)]
+        loads = [one("SELECT pop FROM testgrid.edge_load WHERE target = 'walk_assembly_any' AND edge_id = %s", e)
+                 for e in col0]
+        check("evacuation flow: the 50 residents walk north along column 0", loads == [50, 50, 50], loads)
+        check("no load on streets nobody uses",
+              one("SELECT count(*) FROM testgrid.edge_load WHERE target = 'walk_assembly_any'") == 3)
+        sim = simulate.agents(conn, "testgrid", n=10)
+        walk = sim["walk"]["agents"][0]
+        check("walking route: starts at the home, ends at the park after 3 blocks",
+              walk[1:3] == [round(LON0, 5), round(LAT0, 5)] and near(walk[-3], 3 * 111.0 / mps, 2)
+              and near(walk[-1], LAT0 + 3 * DLAT, 1e-5), walk[-3:])
+        fire = sim["fire"]["agents"][0]
+        check("fire-engine route: starts at the station, ends at the home",
+              fire[0] == 0 and near(fire[2], LAT0 + 4 * DLAT, 1e-5) and near(fire[-1], LAT0, 1e-5)
+              and near(fire[-3], 4 * 111.0 / (30 / 3.6), 2), fire[:3] + fire[-3:])
+        check("route times never go backwards",
+              all(all(a <= b for a, b in zip(r[0::3], r[3::3])) for sc in sim.values() for r in sc["agents"]))
 
         # population & indicators -------------------------------------------
         check("population preserved", near(one("SELECT sum(pop) FROM testgrid.cell"), 57, 1e-6))

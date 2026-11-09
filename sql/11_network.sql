@@ -5,7 +5,7 @@ SET search_path = :"s", public;
 -- One row per road segment between two junctions. Costs are seconds; -1 = not allowed.
 CREATE TABLE edges AS
 SELECT row_number() OVER ()::bigint             AS id,
-       way_id, source, target, walk, drive_fw, drive_bw, speed_kmh, highway,
+       way_id, source, target, walk, drive_fw, drive_bw, speed_kmh, highway, NULLIF(name, '') AS name,
        ST_GeomFromText(wkt, 4326)                AS geom
 FROM edges_raw;
 

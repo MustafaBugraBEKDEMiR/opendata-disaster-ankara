@@ -21,6 +21,8 @@ from pathlib import Path
 
 import psycopg2
 
+import simulate
+
 from config import (FACILITY_ENTRY_M, MAX_COST_S, MAX_SNAP_M, MIN_PARK_M2, RAW, ROOT,
                     SNAP_SPEED_KMH, SOURCES, STUDY, VALIDATION, WALK_SPEED_KMH, WORK)
 
@@ -134,6 +136,7 @@ def main(keys: list[str]) -> None:
         load_area(conn, area)
         for f in AREA_SQL:
             psql(f, **area_vars(area))
+        simulate.compute_loads(conn, key)
     if VALIDATION["key"] in keys:
         psql("20_validation.sql", s=VALIDATION["key"])
     conn.close()

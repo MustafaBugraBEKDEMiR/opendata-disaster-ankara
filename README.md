@@ -1,20 +1,29 @@
-# emergency-access-tr: how fast can people in Ankara reach help after an earthquake?
+# opendata-disaster-ankara: how fast can people in Ankara reach safety and help in a disaster?
 
-[![tests](https://github.com/MustafaBugraBEKDEMiR/emergency-access-tr/actions/workflows/ci.yml/badge.svg)](https://github.com/MustafaBugraBEKDEMiR/emergency-access-tr/actions/workflows/ci.yml)
-[![build](https://github.com/MustafaBugraBEKDEMiR/emergency-access-tr/actions/workflows/build.yml/badge.svg)](https://github.com/MustafaBugraBEKDEMiR/emergency-access-tr/actions/workflows/build.yml)
+[![tests](https://github.com/MustafaBugraBEKDEMiR/opendata-disaster-ankara/actions/workflows/ci.yml/badge.svg)](https://github.com/MustafaBugraBEKDEMiR/opendata-disaster-ankara/actions/workflows/ci.yml)
+[![build](https://github.com/MustafaBugraBEKDEMiR/opendata-disaster-ankara/actions/workflows/build.yml/badge.svg)](https://github.com/MustafaBugraBEKDEMiR/opendata-disaster-ankara/actions/workflows/build.yml)
 
-For every 100 m of populated land in Ankara's nine central districts, this project computes how many
-minutes residents need to:
+When a disaster strikes (an earthquake, a large fire, a flood, an industrial accident), the first
+minutes decide a lot. For every 100 m of populated land in Ankara's nine central districts, this project
+computes, with **open data only**, how many minutes residents need to:
 
 * **walk to the nearest open space that can serve as an assembly area** (park, school grounds or a mapped assembly point),
 * **drive to the nearest hospital**, and
 * **be reached by a fire engine** from the nearest fire station,
 
-along the real street network, and then ranks districts and neighbourhoods (*mahalle*) by how many of
-their residents are within 5, 10 and 15 minutes. It uses **open data only** and checks itself against
-the one official source that is open: Kadıköy Municipality's list of assembly areas.
+along the real street network. It ranks districts and neighbourhoods (*mahalle*) by how many of their
+residents are within 5, 10 and 15 minutes, **simulates the routes** people would take, and finds the
+**streets where an evacuation would crowd first**. It checks itself against the one official source that is
+open: Kadıköy Municipality's list of assembly areas.
 
-**Live map:** <https://mustafabugrabekdemir.github.io/emergency-access-tr/> · **All numbers:** [`results/RESULTS.md`](results/RESULTS.md)
+**Live map and simulation:** <https://mustafabugrabekdemir.github.io/opendata-disaster-ankara/> ·
+**All numbers:** [`results/RESULTS.md`](results/RESULTS.md)
+
+![Simulation: residents walking to assembly-area candidates, driven to hospitals, and fire engines driving to homes in Ankara's urban core](docs/img/simulation.gif)
+
+<sub>Each dot is a resident (sampled by population) following their shortest street route; it turns green on
+arrival. Lines show how many residents' routes use each street segment. Generated from the data by
+[`scripts/make_gif.py`](scripts/make_gif.py).</sub>
 
 ![Walking time to the nearest assembly-area candidate and fire-engine response time](docs/img/access_map.png)
 
@@ -87,8 +96,12 @@ WorldPop 100 m GeoTIFF ──rasterio──▶ populated cells
   14 indicators   population-weighted shares within 5/10/15 min and medians, per area/district/mahalle
   20 validation   Kadıköy: official assembly areas vs OSM candidates, official population vs WorldPop
                  │
+                 ▼  scripts/simulate.py (reads the shortest-path trees)
+  street loads    residents per street segment, summed down each tree
+  routes          full, time-stamped routes of 1,500 residents per scenario, drawn by population
+                 │
                  ▼
-  docs/data/*.geojson (web map) · results/RESULTS.md · docs/img/access_map.png
+  docs/data/ (web map + simulation) · results/RESULTS.md · docs/img/ (figure + GIF)
 ```
 
 Details that matter for the numbers:
@@ -100,18 +113,38 @@ Details that matter for the numbers:
   park is reachable from all sides rather than from its centroid.
 * **Driving respects one-way streets in the right direction:** a fire engine leaves the station
   (station → home), a patient goes to hospital (home → hospital, routed on the reversed graph).
+* **Routes come from the same computation as the times.** `pgr_drivingDistance` returns, for every node,
+  the next node towards the nearest facility. Following those links gives each resident's full route,
+  and summing residents down the tree gives the load of every street segment. No second routing step is
+  needed, so the simulation and the indicators cannot disagree.
 * **Nothing is dropped silently.** Residents with no road within 250 m, or not reached within 60 minutes,
   are reported as "not reached".
 
 | Assumption | Value | Where |
 |---|---|---|
-| Walking speed after an earthquake | 4 km/h | `WALK_SPEED_KMH` |
+| Walking speed in an evacuation | 4 km/h | `WALK_SPEED_KMH` |
 | Driving speed | OSM `maxspeed`, else 30–100 km/h by road class; free flow, no damage | `DRIVE_SPEED_DEFAULT` |
 | Smallest park counted | 1,000 m² | `MIN_PARK_M2` |
 | Max. distance from a cell to a road | 250 m | `MAX_SNAP_M` |
 | Routing cut-off | 60 min | `MAX_COST_S` |
 
 All in [`scripts/config.py`](scripts/config.py); change a value and rerun to test the sensitivity.
+
+## Simulation
+
+The **Simulation** tab of the [live map](https://mustafabugrabekdemir.github.io/opendata-disaster-ankara/#sim)
+plays three scenarios on the real street network:
+
+| Scenario | Who moves | Route |
+|---|---|---|
+| Evacuation on foot | residents | home → nearest park, school ground or assembly point, at 4 km/h |
+| To hospital | residents, by car | home → nearest hospital, one-way streets respected |
+| Fire response | fire engines | nearest station → each home |
+
+The 1,500 animated residents per scenario are drawn at random with probability proportional to population
+(fixed seed, so every build draws the same people). The street-load lines underneath include **all**
+residents. It is a route simulation, not a crowd model: people do not slow each other down, and roads
+are assumed open. The load lines show where congestion *would* start.
 
 ## Run it
 
@@ -140,7 +173,8 @@ the same on a GitHub runner and commits the results; it also reruns monthly with
 hand-made 5 × 5 street grid whose answers can be checked on paper. It is a test fixture, not data. It checks
 splitting at junctions, walk/drive permissions, one-way detours (a 6-block detour where the direct
 way is 4 blocks), entry from all sides of a park, exact walking and driving times, that unrouted residents are
-reported, neighbourhood assignment, Turkish name matching and number parsing.
+reported, the evacuation load on each street, the full time-stamped routes (a walker ends at the park,
+a fire engine starts at the station), neighbourhood assignment, Turkish name matching and number parsing.
 
 ## Limitations
 
@@ -162,10 +196,11 @@ reported, neighbourhood assignment, Turkish name matching and number parsing.
 ## Repository layout
 
 ```
-scripts/   config.py (all settings), download.py, prepare.py, build.py, export_web.py, make_figure.py
+scripts/   config.py (all settings), download.py, prepare.py, build.py, simulate.py,
+           export_web.py, make_figure.py, make_gif.py
 sql/       00_init → 14_indicators (per area), 20_validation, 21_report
 tests/     run_tests.py (test grid built in code)
-docs/      index.html (Leaflet web map), data/ (exported by the build), img/
+docs/      index.html (Leaflet web map + simulation), data/ (exported by the build), img/
 results/   RESULTS.md, SOURCES.json (URL, size, SHA-256 and date of every input file)
 ```
 
@@ -179,7 +214,7 @@ Code: MIT licence. Data: see the table above.
 
 ## Türkçe özet
 
-Bu proje, Ankara'nın dokuz merkez ilçesinde (Altındağ, Çankaya, Etimesgut, Gölbaşı, Keçiören, Mamak,
+Afet anında (deprem, büyük yangın, sel, endüstriyel kaza) ilk dakikalar belirleyicidir. Bu proje, Ankara'nın dokuz merkez ilçesinde (Altındağ, Çankaya, Etimesgut, Gölbaşı, Keçiören, Mamak,
 Pursaklar, Sincan, Yenimahalle) her 100 m'lik nüfuslu alan için gerçek yol ağı üzerinden şu süreleri hesaplar:
 
 * toplanma alanı olabilecek en yakın açık alana (park, okul bahçesi, haritalanmış toplanma noktası) **yürüme süresi**,
@@ -190,6 +225,11 @@ Sonuçlar ilçe ve mahalle bazında, nüfusun yüzde kaçının 5, 10 ve 15 daki
 özetlenir. Resmî AFAD toplanma alanları Ankara için açık veri olarak yayımlanmadığı için yalnızca
 **açık veri** kullanılır (OpenStreetMap, WorldPop) ve bu alanlar "aday" olarak adlandırılır. Bu yaklaşımın
 ne kadar isabetli olduğu, resmî verisini açık yayımlayan **Kadıköy** üzerinde test edilir.
+
+**Simülasyon:** En kısa yol ağaçlarından her sakinin gerçek rotası çıkarılır. Web haritasındaki
+*Simulation* sekmesi ve yukarıdaki GIF, nüfusa göre seçilmiş sakinlerin toplanma alanına yürüyüşünü,
+hastaneye gidişini ve itfaiye araçlarının istasyondan evlere gelişini canlandırır. Her sokağın kaç kişinin
+rotası üzerinde olduğu da hesaplanır; böylece tahliyede ilk sıkışacak caddeler görülür.
 
 **Öne çıkan sonuçlar:** Nüfusun %86,7'si en yakın toplanma alanı adayına 10 dakikada yürüyebiliyor; en
 zayıf ilçe Gölbaşı (%49,9). OpenStreetMap'te Ankara'nın resmî toplanma alanları neredeyse hiç yok (yalnızca

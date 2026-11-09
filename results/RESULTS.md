@@ -92,6 +92,28 @@ Most are former villages on the urban edge (*mahalle* since the 2012 metropolita
 | İkizce Mahallesi | Gölbaşı | 1,238 | 0.0 % | > 60 | 24 | 0 |
 | Akçaören Mahallesi | Sincan | 2,252 | 0.0 % | > 60 | 11.6 | 0 |
 
+## Streets that would carry the most people on foot
+
+Every resident walks the shortest route to the nearest assembly-area candidate; the load of a street segment is the number of residents whose route uses it. The table shows the busiest segment of each named street. These are the streets where an evacuation would crowd first.
+
+| Street | district | residents on the busiest segment |
+|---|---|---|
+| ASO Bulvar | Sincan | 26,490 |
+| 2473 Caddesi | Etimesgut | 9,334 |
+| Oğuz Cadde | Sincan | 9,255 |
+| 2500. Cadde | Etimesgut | 9,046 |
+| 2551. Cadde | Etimesgut | 7,439 |
+| 3890. Cadde | Yenimahalle | 6,990 |
+| Altınay Caddesi | Altındağ | 6,494 |
+| 158 Sokak | Yenimahalle | 6,425 |
+| Cennet Sokak | Keçiören | 6,412 |
+| 846. Cadde | Mamak | 6,259 |
+| 153 Caddesi | Yenimahalle | 6,241 |
+| Ayrık Sokak | Keçiören | 5,863 |
+| 32. Sokak | Yenimahalle | 5,770 |
+| 33. Sokak | Yenimahalle | 5,345 |
+| Kayaş Caddesi | Mamak | 5,288 |
+
 ## Check: WorldPop vs TÜİK district totals
 
 WorldPop is a 2025 model estimate, TÜİK ADNKS the 2021 register, so the ratio should be near 1, not exactly 1.

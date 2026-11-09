@@ -16,8 +16,40 @@ the one official source that is open: Kadıköy Municipality's list of assembly 
 
 **Live map:** <https://mustafabugrabekdemir.github.io/emergency-access-tr/> · **All numbers:** [`results/RESULTS.md`](results/RESULTS.md)
 
-<!-- The figure and the findings below are filled in by the build workflow's first run. -->
 ![Walking time to the nearest assembly-area candidate and fire-engine response time](docs/img/access_map.png)
+
+## Key findings (OSM extract of 9 November 2026)
+
+5.32 million residents, 176,360 populated 100 m cells, 18,900 km of walkable streets.
+
+| | ≤ 10 min | median |
+|---|---|---|
+| Walk to the nearest assembly-area candidate (park, school grounds, assembly point) | **86.7 %** of residents | 2.9 min |
+| Drive to the nearest hospital | **94.8 %** | 2.6 min |
+| Fire engine from the nearest station *(see the caveat below)* | **86.7 %** | 5.5 min |
+
+1. **Ankara's assembly areas are practically absent from OpenStreetMap.** Only 14 points are tagged
+   `emergency=assembly_point` in the nine districts; 96.5 % of residents have none within an hour's walk.
+   Anyone building an app or a map on OSM for Ankara inherits that gap. Parks and school grounds are
+   everywhere by comparison (2,285 parks ≥ 1,000 m², 1,116 schools).
+2. **The urban edge is where walking access breaks down.** Gölbaşı has only 49.9 % of its residents within
+   a 10-minute walk of a candidate (median 10 min), Sincan 73.6 %; Keçiören has 97.6 %. Among urban
+   neighbourhoods (≥ 10,000 residents) the weakest are on the western and north-western edge: Bahçekapı
+   (Etimesgut, 64,800 residents, 25.4 % within 10 min), Erler (Etimesgut, 17.8 %) and İvedikköy
+   (Yenimahalle, 16.8 %). Two Sincan entries are organised industrial zones (OSB); WorldPop spreads
+   population over all buildings, factories included, so read those with care.
+3. **Fire-engine coverage is weakest in Pursaklar and Gölbaşı** (44.9 % and 54.3 % within 10 min), but see the
+   caveat: OSM has 15 fire stations in the study area, while Ankara Fire Department reports about 49 stations
+   province-wide. These times are therefore an upper bound.
+4. **OSM candidates are a usable but generous stand-in for the official list.** In Kadıköy, where the
+   official list is open, all 21 neighbourhoods matched: OSM yields 226 candidates and 1.66 million m²
+   against 150 official areas and 1.16 million m² (43 % more surface). The neighbourhood ranking agrees
+   moderately (Spearman 0.63). The surplus comes mostly from large coastal and district parks that the
+   municipality does not count in full (Fenerbahçe: 180,000 m² in OSM vs 9,400 m² official).
+5. **WorldPop is reliable at this scale.** Kadıköy: 487,500 (WorldPop 2025) vs 483,100 (official 2022), Spearman
+   0.95 across neighbourhoods. Ankara districts: 1.02–1.08 × the TÜİK 2021 register, consistent with four years of growth.
+
+Full tables, including every district and the 25 weakest neighbourhoods: [`results/RESULTS.md`](results/RESULTS.md).
 
 ## Why open data, and what that means
 
@@ -116,7 +148,11 @@ reported, neighbourhood assignment, Turkish name matching and number parsing.
   an official area may be a car park that OSM does not tag as open space. The Kadıköy check shows how
   large this gap is in one district; it does not prove the same for Ankara.
 * **OpenStreetMap completeness varies.** Footpaths, school outlines and especially
-  `emergency=assembly_point` are mapped unevenly; a gap on the map can be a gap in OSM.
+  `emergency=assembly_point` are mapped unevenly; a gap on the map can be a gap in OSM. Fire stations are
+  the clearest case: 15 in OSM for the study area, against about 49 stations that the Ankara Fire Department
+  reports for the whole province.
+* **Population in industrial zones.** WorldPop distributes people over buildings; organised industrial zones
+  (OSB) can receive residents they do not have.
 * **Free-flow driving.** No traffic, no debris, no collapsed buildings: post-disaster times will be longer.
   The driving results show the best case of the network's layout.
 * **WorldPop is a model.** It distributes census totals to buildings; the TÜİK comparison in the results
@@ -154,6 +190,11 @@ Sonuçlar ilçe ve mahalle bazında, nüfusun yüzde kaçının 5, 10 ve 15 daki
 özetlenir. Resmî AFAD toplanma alanları Ankara için açık veri olarak yayımlanmadığı için yalnızca
 **açık veri** kullanılır (OpenStreetMap, WorldPop) ve bu alanlar "aday" olarak adlandırılır. Bu yaklaşımın
 ne kadar isabetli olduğu, resmî verisini açık yayımlayan **Kadıköy** üzerinde test edilir.
+
+**Öne çıkan sonuçlar:** Nüfusun %86,7'si en yakın toplanma alanı adayına 10 dakikada yürüyebiliyor; en
+zayıf ilçe Gölbaşı (%49,9). OpenStreetMap'te Ankara'nın resmî toplanma alanları neredeyse hiç yok (yalnızca
+14 nokta). Kadıköy'de OSM adayları resmî listeden %43 daha fazla alan veriyor; mahalle sıralaması orta
+düzeyde uyuşuyor (Spearman 0,63). WorldPop nüfusu ise resmî nüfusla neredeyse birebir örtüşüyor (%0,9 fark).
 
 Kurulum: `docker compose run --rm pipeline make all`. Tüm analiz SQL'dedir (PostGIS + pgRouting).
 Testler, sonuçları kâğıt üzerinde doğrulanabilen küçük bir test ızgarası üzerinde tüm hattı çalıştırır.

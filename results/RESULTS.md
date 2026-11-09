@@ -53,25 +53,44 @@ Sorted by the share of people within a 10-minute walk of an assembly-area candid
 
 ## Neighbourhoods with the weakest walking access
 
-Neighbourhoods with at least 1,000 residents, sorted by the share within a 10-minute walk of an assembly-area candidate.
+### Urban neighbourhoods (≥ 10,000 residents)
+
+Sorted by the share of residents within a 10-minute walk of an assembly-area candidate.
 
 | Neighbourhood | district | population | walk ≤ 10 min | walk median | fire median | candidate m² / person |
 |---|---|---|---|---|---|---|
-| Yenipeçenek Mahallesi | Sincan | 1,229 | 0.0 % | > 60 | 15.9 | 0 |
-| Yenikayı Mahallesi | Sincan | 1,859 | 0.0 % | > 60 | 18.8 | 0 |
-| Mülk Mahallesi | Sincan | 1,349 | 0.0 % | > 60 | 15.8 | 0 |
-| Akçaören Mahallesi | Sincan | 2,252 | 0.0 % | > 60 | 11.6 | 0 |
-| Karataş Mahallesi | Çankaya | 1,188 | 0.0 % | > 60 | 17.2 | 0 |
+| Malıköy Başkent OSB Mahallesi | Sincan | 22,980 | 0.0 % | > 60 | 4 | 0 |
+| Ahi Evran OSB Mahallesi | Sincan | 39,463 | 13.5 % | 25.4 | 6.4 | 0.36 |
+| İvedikköy Mahallesi | Yenimahalle | 23,023 | 16.8 % | 24.2 | 9.5 | 0.79 |
+| Erler Mahallesi | Etimesgut | 30,179 | 17.8 % | 25.6 | 10 | 1.49 |
+| Bahçekapı Mahallesi | Etimesgut | 64,837 | 25.4 % | 22.1 | 7.5 | 1.59 |
+| Gazi Mahallesi | Yenimahalle | 32,281 | 31.1 % | 14.8 | 6.8 | 26.9 |
+| Saraycık Mahallesi | Sincan | 12,131 | 31.9 % | 15.9 | 8 | 2.55 |
+| Macun Mahallesi | Yenimahalle | 17,494 | 34.6 % | 14.5 | 5.1 | 1.12 |
+| Çiğiltepe Mahallesi | Mamak | 11,579 | 46.7 % | 11.2 | 6.9 | 0.39 |
+| Beytepe Mahallesi | Çankaya | 11,936 | 47.6 % | 10.3 | 7.6 | 5.95 |
+| Ahlatlıbel Mahallesi | Çankaya | 11,503 | 48.5 % | 11.1 | 10.8 | 34.37 |
+| Devlet Mahallesi | Çankaya | 26,900 | 50.3 % | 9.9 | 7.5 | 16.94 |
+| Adalet Mahallesi | Sincan | 11,235 | 52.7 % | 9.5 | 13.3 | 0.51 |
+| Üniversiteler Mahallesi | Çankaya | 39,014 | 54.0 % | 9.2 | 10.1 | 8.51 |
+| Etiler Mahallesi | Etimesgut | 15,395 | 54.4 % | 9.1 | 8.9 | 3.52 |
+
+### All neighbourhoods (≥ 1,000 residents)
+
+Most are former villages on the urban edge (*mahalle* since the 2012 metropolitan law), where OSM rarely maps a school yard or village square, so part of this gap is a mapping gap.
+
+| Neighbourhood | district | population | walk ≤ 10 min | walk median | fire median | candidate m² / person |
+|---|---|---|---|---|---|---|
 | Yurtbeyi Mahallesi | Gölbaşı | 2,217 | 0.0 % | > 60 | 14.1 | 0 |
 | Balıkuyumcu Mahallesi | Etimesgut | 2,239 | 0.0 % | > 60 | 16.7 | 0 |
-| İlyakut Mahallesi | Sincan | 2,119 | 0.0 % | > 60 | 12.4 | 0 |
+| Karataş Mahallesi | Çankaya | 1,188 | 0.0 % | > 60 | 17.2 | 0 |
 | Şehitali Mahallesi | Etimesgut | 2,879 | 0.0 % | > 60 | 19.7 | 0 |
 | Gökçeyurt Mahallesi | Mamak | 6,139 | 0.0 % | > 60 | 17.7 | 0 |
-| Karacakaya Mahallesi | Yenimahalle | 2,630 | 0.0 % | > 60 | 15.6 | 0 |
 | Tulumtaş Mahallesi | Gölbaşı | 3,987 | 0.0 % | > 60 | 12.4 | 0 |
 | Fevziye Mahallesi | Etimesgut | 2,293 | 0.0 % | > 60 | 23.5 | 0 |
+| Karacakaya Mahallesi | Yenimahalle | 2,630 | 0.0 % | > 60 | 15.6 | 0 |
 | İkizce Mahallesi | Gölbaşı | 1,238 | 0.0 % | > 60 | 24 | 0 |
-| Alagöz Mahallesi | Sincan | 1,916 | 0.0 % | > 60 | 17.1 | 0 |
+| Akçaören Mahallesi | Sincan | 2,252 | 0.0 % | > 60 | 11.6 | 0 |
 
 ## Check: WorldPop vs TÜİK district totals
 
@@ -95,38 +114,38 @@ Kadıköy Municipality publishes the number and surface of its official assembly
 
 |  | official | this pipeline |
 |---|---|---|
-| Neighbourhoods | 21 | 20 matched by name |
-| Assembly areas / candidates | 138 | 207 |
-| Surface (m²) | 1,080,547 | 1,550,179 |
-| Rank correlation of surface (Spearman) |  | 0.62 |
-| Population (official 2022 / WorldPop 2025) | 450,312 | 456,113 |
+| Neighbourhoods | 21 | 21 matched by name |
+| Assembly areas / candidates | 150 | 226 |
+| Surface (m²) | 1,160,402 | 1,658,872 |
+| Rank correlation of surface (Spearman) |  | 0.63 |
+| Population (official 2022 / WorldPop 2025) | 483,064 | 487,528 |
 | Rank correlation of population (Spearman) |  | 0.95 |
 
 <details><summary>Per neighbourhood</summary>
 
 | Neighbourhood | official areas | official m² | OSM candidates | OSM m² | official pop. 2022 | WorldPop 2025 |
 |---|---|---|---|---|---|---|
-| ACIBADEM | 14 | 100119 | 11 | 67,446 | 29,563 | 26,953 |
-| BOSTANCI | 15 | 40312.6 | 22 | 71,031 | 33,638 | 33,816 |
-| CADDEBOSTAN | 5 | 101060 | 11 | 221,326 | 21,058 | 28,889 |
-| CAFERAĞA | 4 | 66511 | 16 | 193,196 | 22,347 | 20,749 |
-| DUMLUPINAR | 4 | 23773 | 7 | 42,757 | 10,185 | 13,019 |
+| ACIBADEM | 14 | 100,119 | 11 | 67,446 | 29,563 | 26,953 |
+| BOSTANCI | 15 | 40,313 | 22 | 71,031 | 33,638 | 33,816 |
+| CADDEBOSTAN | 5 | 101,060 | 11 | 221,326 | 21,058 | 28,889 |
+| CAFERAĞA | 4 | 66,511 | 16 | 193,196 | 22,347 | 20,749 |
+| DUMLUPINAR | 4 | 23,773 | 7 | 42,757 | 10,185 | 13,019 |
 | ERENKÖY | 4 | 27,098 | 8 | 31,032 | 35,530 | 31,990 |
-| EĞİTİM | 6 | 175287 | 6 | 193,314 | 14,204 | 18,401 |
-| FENERBAHÇE | 4 | 9387.4 | 15 | 180,377 | 21,405 | 26,866 |
-| FENERYOLU | 8 | 16459.4 | 6 | 11,856 | 26,542 | 23,347 |
+| EĞİTİM | 6 | 175,287 | 6 | 193,314 | 14,204 | 18,401 |
+| FENERBAHÇE | 4 | 9,387 | 15 | 180,377 | 21,405 | 26,866 |
+| FENERYOLU | 8 | 16,459 | 6 | 11,856 | 26,542 | 23,347 |
 | FİKİRTEPE | 1 | 851.86 | 1 | 2,887 | 12,390 | 11,092 |
-| GÖZTEPE | 11 | 146651 | 19 | 175,539 | 40,858 | 39,643 |
-| HASANPAŞA | 6 | 86531.2 | 8 | 60,294 | 16,564 | 12,874 |
-| KOZYATAĞI | 12 | 24223.2 | 8 | 24,395 | 37,743 | 34,372 |
-| KOŞUYOLU | 10 | 53307.4 | 11 | 41,034 | 6,912 | 10,839 |
-| MERDİVENKÖY | 13 | 138830 | 15 | 42,256 | 32,395 | 30,042 |
-| ON DOKUZ MAYIS | 12 | 79855 | – | – | 32,752 | – |
-| OSMANAĞA | 3 | 24636.9 | 5 | 28,375 | 8,652 | 11,374 |
-| RASİMPAŞA | 3 | 4701.39 | 3 | 4,408 | 13,369 | 13,410 |
-| SAHRAYICEDİT | 10 | 34469.4 | 19 | 60,553 | 31,423 | 28,175 |
-| SUADİYE | 4 | 3680.87 | 12 | 88,338 | 27,120 | 29,579 |
-| ZÜHTÜPAŞA | 1 | 2656.68 | 4 | 9,765 | 8,414 | 10,683 |
+| GÖZTEPE | 11 | 146,651 | 19 | 175,539 | 40,858 | 39,643 |
+| HASANPAŞA | 6 | 86,531 | 8 | 60,294 | 16,564 | 12,874 |
+| KOZYATAĞI | 12 | 24,223 | 8 | 24,395 | 37,743 | 34,372 |
+| KOŞUYOLU | 10 | 53,307 | 11 | 41,034 | 6,912 | 10,839 |
+| MERDİVENKÖY | 13 | 138,830 | 15 | 42,256 | 32,395 | 30,042 |
+| ON DOKUZ MAYIS | 12 | 79,855 | 19 | 108,693 | 32,752 | 31,415 |
+| OSMANAĞA | 3 | 24,637 | 5 | 28,375 | 8,652 | 11,374 |
+| RASİMPAŞA | 3 | 4,701 | 3 | 4,408 | 13,369 | 13,410 |
+| SAHRAYICEDİT | 10 | 34,469 | 19 | 60,553 | 31,423 | 28,175 |
+| SUADİYE | 4 | 3,681 | 12 | 88,338 | 27,120 | 29,579 |
+| ZÜHTÜPAŞA | 1 | 2,657 | 4 | 9,765 | 8,414 | 10,683 |
 
 </details>
 

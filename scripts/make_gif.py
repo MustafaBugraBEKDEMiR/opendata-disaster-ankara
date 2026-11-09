@@ -20,9 +20,9 @@ from matplotlib.collections import LineCollection    # noqa: E402
 
 from config import DOCS_DATA, ROOT                   # noqa: E402
 
-BBOX = (32.60, 39.84, 33.02, 40.04)    # lon/lat of the urban core shown in the GIF
-T_END = 15 * 60                        # seconds shown
-FRAMES, HOLD = 60, 10                  # animated frames + frames holding the last state
+BBOX = (32.63, 39.855, 32.99, 40.025)    # lon/lat of the urban core shown in the GIF
+T_END = 10 * 60                        # seconds shown
+FRAMES, HOLD = 60, 16                  # animated frames + frames holding the last state
 PANELS = [("walk", "On foot to an assembly-area candidate", "#2c5fa8"),
           ("hospital", "By car to the nearest hospital", "#d62728"),
           ("fire", "Fire engine to each home", "#ff7f0e")]
@@ -39,8 +39,8 @@ def main() -> None:
     dist = json.loads((DOCS_DATA / "districts.geojson").read_text("utf-8"))["features"]
     meta = json.loads((DOCS_DATA / "meta.json").read_text("utf-8"))
 
-    fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.5), dpi=80)
-    fig.subplots_adjust(left=0.01, right=0.99, top=0.78, bottom=0.08, wspace=0.03)
+    fig, axes = plt.subplots(1, 3, figsize=(14, 5.0), dpi=85)
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.80, bottom=0.06, wspace=0.03)
     title = fig.suptitle("", fontsize=15, fontweight="bold", y=0.97)
     state = []
     for ax, (key, label, col) in zip(axes, PANELS):
@@ -69,13 +69,13 @@ def main() -> None:
         tracks = [(np.array(a[0::3]), np.array(a[1::3]), np.array(a[2::3])) for a in ag]
         tracks = [t for t in tracks if BBOX[0] <= t[1][-1] <= BBOX[2] and BBOX[1] <= t[2][-1] <= BBOX[3]]
         moving = ax.scatter([], [], s=9, c=col, edgecolors="white", linewidths=0.4, zorder=4)
-        done = ax.scatter([], [], s=4, c=ARRIVED, alpha=0.75, zorder=3)
+        done = ax.scatter([], [], s=3, c=ARRIVED, alpha=0.55, zorder=3)
         txt = ax.text(0.02, 1.02, "", transform=ax.transAxes, fontsize=10.5, va="bottom", color="#1d2433")
         ax.set_title(label, fontsize=12, pad=22, color=col, fontweight="bold")
         state.append((tracks, moving, done, txt))
-    fig.text(0.01, 0.015, "Shortest street routes of residents sampled by population (WorldPop 2025) · lines: residents per "
-             "street segment · OSM maps only part of the fire stations, so fire times are upper bounds · "
-             f"© OpenStreetMap contributors · built {meta['generated']}", fontsize=8, color="#5b6475")
+    fig.text(0.01, 0.015, "Dots: residents sampled by population, on their shortest street route (green = arrived). "
+             "Lines: residents per street segment. Fire stations in OSM are incomplete: fire times are upper bounds. "
+             f"Data © OpenStreetMap contributors, WorldPop. Built {meta['generated']}.", fontsize=7.5, color="#5b6475")
 
     def frame(i):
         t = min(i, FRAMES) / FRAMES * T_END

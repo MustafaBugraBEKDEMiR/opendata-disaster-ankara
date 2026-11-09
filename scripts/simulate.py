@@ -24,7 +24,7 @@ from collections import defaultdict
 import numpy as np
 import psycopg2
 
-from config import SIM_AGENTS, SIM_SEED, SNAP_SPEED_KMH, STUDY, VALIDATION
+from config import SIM_AGENTS, SIM_SEED, SIM_SIMPLIFY_DEG, SNAP_SPEED_KMH, STUDY, VALIDATION
 
 SCENARIOS = {          # target in node_access → how the agent moves along the tree
     "walk_assembly_any": {"key": "walk", "outward": False,
@@ -82,6 +82,30 @@ def _spread(coords: list, t0: float, t1: float) -> list[tuple[float, float, floa
         d.append(d[-1] + _dist(a, b))
     total = d[-1] or 1.0
     return [(t0 + (t1 - t0) * x / total, c[0], c[1]) for x, c in zip(d, coords)]
+
+
+def _simplify(seq: list[tuple[float, float, float]], tol: float) -> list[tuple[float, float, float]]:
+    """Douglas–Peucker on the route's shape (tol in degrees); kept vertices keep their times."""
+    if len(seq) < 3:
+        return seq
+    keep = [False] * len(seq)
+    keep[0] = keep[-1] = True
+    stack = [(0, len(seq) - 1)]
+    while stack:
+        i, j = stack.pop()
+        (_, x1, y1), (_, x2, y2) = seq[i], seq[j]
+        dx, dy = x2 - x1, y2 - y1
+        n = math.hypot(dx, dy)
+        best, k = -1.0, -1
+        for m in range(i + 1, j):
+            _, x, y = seq[m]
+            d = (abs(dy * (x - x1) - dx * (y - y1)) / n) if n else math.hypot(x - x1, y - y1)
+            if d > best:
+                best, k = d, m
+        if best > tol:
+            keep[k] = True
+            stack += [(i, k), (k, j)]
+    return [p for p, kp in zip(seq, keep) if kp]
 
 
 def agents(conn, s: str, n: int = SIM_AGENTS, seed: int = SIM_SEED) -> dict:
@@ -146,7 +170,7 @@ def agents(conn, s: str, n: int = SIM_AGENTS, seed: int = SIM_SEED) -> dict:
             if sc["outward"]:                      # fire engine: station → home
                 seq = [(total_s - t, x, y) for t, x, y in reversed(seq)]
             flat, last = [], None
-            for t, x, y in seq:
+            for t, x, y in _simplify(seq, SIM_SIMPLIFY_DEG):
                 key = (round(x, 5), round(y, 5))
                 if key == last:
                     continue

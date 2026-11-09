@@ -52,6 +52,7 @@ MIN_PARK_M2 = 1000          # parks smaller than this are not counted as assembl
 SIM_AGENTS = 1500           # residents drawn per scenario for the animated routes (by population weight)
 FLOW_EDGES_WALK = 6000      # busiest street segments exported to the web map, walking scenario
 FLOW_EDGES_DRIVE = 3000     # … hospital and fire scenarios
+SIM_SIMPLIFY_DEG = 0.00005   # ≈ 5 m: route shapes are simplified for the web (times stay exact at kept vertices)
 SIM_SEED = 2026             # fixed, so the same residents are drawn on every run
 WEB_GRID_M = 500            # cell size of the web-map grid (the analysis itself uses the 100 m WorldPop grid)
 

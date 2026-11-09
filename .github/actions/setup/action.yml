@@ -1,0 +1,25 @@
+name: setup
+description: PostgreSQL 16 + PostGIS + pgRouting, osmium-tool and the Python requirements
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: pip
+    - shell: bash
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq postgresql-16 postgresql-16-postgis-3 postgresql-16-pgrouting osmium-tool
+        sudo systemctl start postgresql
+        sudo -u postgres psql -qc "CREATE ROLE gis LOGIN SUPERUSER PASSWORD 'gis'"
+        sudo -u postgres psql -qc "CREATE DATABASE access OWNER gis"
+        sudo -u postgres psql -qc "ALTER SYSTEM SET shared_buffers = '2GB'" \
+                              -qc "ALTER SYSTEM SET work_mem = '256MB'" \
+                              -qc "ALTER SYSTEM SET maintenance_work_mem = '1GB'"
+        sudo systemctl restart postgresql
+        pip install -q -r requirements.txt
+        echo "PGHOST=localhost" >> "$GITHUB_ENV"
+        echo "PGUSER=gis"       >> "$GITHUB_ENV"
+        echo "PGPASSWORD=gis"   >> "$GITHUB_ENV"
+        echo "PGDATABASE=access" >> "$GITHUB_ENV"

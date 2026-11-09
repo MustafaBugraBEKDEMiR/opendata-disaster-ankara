@@ -1,0 +1,58 @@
+{
+  "osm_pbf": {
+    "url": "https://download.geofabrik.de/europe/turkey-latest.osm.pbf",
+    "file": "turkey-latest.osm.pbf",
+    "licence": "© OpenStreetMap contributors, ODbL 1.0",
+    "bytes": 653261176,
+    "sha256": "bdd2c50a11b67234253d56016a1a8df17c5fc88c9ad5cecba88e21b2f3cdcae2",
+    "downloaded": "2026-11-09"
+  },
+  "worldpop": {
+    "url": "https://data.worldpop.org/GIS/Population/Global_2015_2030/R2025A/2025/TUR/v1/100m/constrained/tur_pop_2025_CN_100m_R2025A_v1.tif",
+    "file": "tur_pop_2025_CN_100m_R2025A_v1.tif",
+    "licence": "WorldPop R2025A, CC BY 4.0",
+    "bytes": 77387739,
+    "sha256": "dabb36ce32d839962aa521181f6c62be0c8a5114d2cbb3dd6efbf0bcfb2acdf8",
+    "downloaded": "2026-11-09"
+  },
+  "districts": {
+    "url": "https://raw.githubusercontent.com/MustafaBugraBEKDEMiR/turkiye-district-gis/005873a/data/raw/geoBoundaries-TUR-ADM2_simplified.geojson",
+    "file": "geoBoundaries-TUR-ADM2_simplified.geojson",
+    "licence": "geoBoundaries gbOpen (OpenStreetMap), ODbL 1.0",
+    "bytes": 3868305,
+    "sha256": "17af9a6bff9bed53390e49cbbf66569e0d296f134cd4528e1dc3c0d204e358f3",
+    "downloaded": "2026-11-09"
+  },
+  "provinces": {
+    "url": "https://raw.githubusercontent.com/MustafaBugraBEKDEMiR/turkiye-district-gis/005873a/data/raw/geoBoundaries-TUR-ADM1_simplified.geojson",
+    "file": "geoBoundaries-TUR-ADM1_simplified.geojson",
+    "licence": "geoBoundaries gbOpen (OpenStreetMap), ODbL 1.0",
+    "bytes": 1559408,
+    "sha256": "94f64008c50e1953a56eb9dc1fb7367944d2290c6da5976a4f31e7eca35b3117",
+    "downloaded": "2026-11-09"
+  },
+  "tuik_districts": {
+    "url": "https://raw.githubusercontent.com/MustafaBugraBEKDEMiR/turkiye-district-gis/005873a/data/raw/tuik-adnks-il-ilce.json",
+    "file": "tuik-adnks-il-ilce.json",
+    "licence": "TÜİK ADNKS 2021 (public statistics)",
+    "bytes": 293691,
+    "sha256": "a071f7ea74377057c8a48c46fe47fddc0a6ba4f9abab1b34c6ff068b9a9496a4",
+    "downloaded": "2026-11-09"
+  },
+  "kadikoy_areas": {
+    "url": "https://acikveri.kadikoy.bel.tr/dataset/7955961c-298a-4121-92d2-c77c53b2783c/resource/9328e758-cc03-4945-a4d9-17381d0e3a8b/download/mahalle_afet_toplanma_alanlari_miktari.csv",
+    "file": "kadikoy_mahalle_afet_toplanma_alanlari.csv",
+    "licence": "Kadıköy Belediyesi Açık Veri, CC BY 3.0",
+    "bytes": 578,
+    "sha256": "c9a7742108e96893a920052ab26928da95a211d0df5035010a97357fd7a0a932",
+    "downloaded": "2026-11-09"
+  },
+  "kadikoy_per_capita": {
+    "url": "https://acikveri.kadikoy.bel.tr/dataset/fe07be6d-970b-414a-b2d2-00abcf4a334a/resource/541872aa-acd5-483a-bb79-0bf69b789f4b/download/mahallelere_gore_kisi_basi_toplanma_alani.xlsx",
+    "file": "kadikoy_kisi_basi_toplanma_alani.xlsx",
+    "licence": "Kadıköy Belediyesi Açık Veri, CC BY 3.0",
+    "bytes": 10618,
+    "sha256": "35849f48d9580d839cb3552a2068953c39fc50538eab287d10346dc25b2c444f",
+    "downloaded": "2026-11-09"
+  }
+}

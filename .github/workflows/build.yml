@@ -26,8 +26,17 @@ jobs:
       - name: Tests (test grid)
         run: python tests/run_tests.py
 
+      # Source files are cached between runs; the monthly run fetches a fresh OSM extract.
+      - uses: actions/cache@v4
+        with:
+          path: data/raw
+          key: raw-${{ github.run_id }}
+          restore-keys: raw-
+
       - name: Download sources
-        run: python scripts/download.py
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then rm -f data/raw/turkey-latest.osm.pbf; fi
+          python scripts/download.py
 
       - name: Prepare (OSM extract, road graph, population cells)
         run: python -u scripts/prepare.py

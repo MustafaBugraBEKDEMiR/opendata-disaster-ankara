@@ -99,7 +99,8 @@ CREATE TABLE cell AS
 SELECT c.cell_id, c.pop, d.name AS district, NULL::bigint AS mahalle_id,
        ST_Transform(ST_SetSRID(ST_MakePoint(c.lon, c.lat), 4326), :epsg)::geometry(Point, :epsg) AS geom_m
 FROM cells_raw c
-JOIN district d ON ST_Intersects(d.geom_m, ST_Transform(ST_SetSRID(ST_MakePoint(c.lon, c.lat), 4326), :epsg));
+JOIN district d ON ST_Intersects(d.geom_m, ST_Transform(ST_SetSRID(ST_MakePoint(c.lon, c.lat), 4326), :epsg))
+WHERE c.pop > 0;
 ALTER TABLE cell ADD PRIMARY KEY (cell_id),
   ADD CONSTRAINT cell_pop_positive CHECK (pop > 0);
 CREATE INDEX cell_gix ON cell USING gist (geom_m);

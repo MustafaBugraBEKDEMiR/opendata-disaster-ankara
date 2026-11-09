@@ -35,7 +35,8 @@ import rasterio
 from pyproj import Transformer
 from rasterio.windows import from_bounds
 from shapely.geometry import mapping, shape
-from shapely.ops import transform, unary_union
+import shapely
+from shapely.ops import unary_union
 
 from config import DRIVE_SPEED_DEFAULT, RAW, SOURCES, STUDY, VALIDATION, WORK
 
@@ -215,7 +216,7 @@ def export_cells(tif: Path, bbox: tuple[float, float, float, float], out: Path) 
             lon, lat = tr * (c + 0.5, r + 0.5)
             # stable id from the cell's position in the national raster
             wr.writerow([(row0 + r) * 1_000_000 + (col0 + c), f"{lon:.6f}", f"{lat:.6f}",
-                         f"{vals[r, c]:.3f}"])
+                         f"{vals[r, c]:.6g}"])
     return {"cells": int(len(rows)), "population": round(float(vals.sum()), 1)}
 
 
@@ -229,10 +230,11 @@ def prepare(area: dict, pbf: Path, tif: Path, districts: Path, provinces: Path,
 
     feats = area_polygons(area, districts, provinces)
     write_geojson(wd / "area.geojson", feats)
-    to_m = Transformer.from_crs(4326, area["epsg"], always_xy=True).transform
-    to_ll = Transformer.from_crs(area["epsg"], 4326, always_xy=True).transform
-    union_m = transform(to_m, unary_union([shape(f["geometry"]) for f in feats]))
-    clip = transform(to_ll, union_m.buffer(area["network_buffer_m"]).simplify(20))
+    to_m = Transformer.from_crs(4326, area["epsg"], always_xy=True)
+    to_ll = Transformer.from_crs(area["epsg"], 4326, always_xy=True)
+    reproject = lambda g, tr: shapely.transform(g, lambda xy: np.column_stack(tr.transform(xy[:, 0], xy[:, 1])))
+    union_m = reproject(unary_union([shape(f["geometry"]) for f in feats]), to_m)
+    clip = reproject(union_m.buffer(area["network_buffer_m"]).simplify(20), to_ll)
     write_geojson(wd / "clip.geojson", [{"type": "Feature", "properties": {}, "geometry": mapping(clip)}])
 
     run("osmium", "extract", "-p", wd / "clip.geojson", pbf, "-o", wd / "extract.osm.pbf", "--overwrite")
